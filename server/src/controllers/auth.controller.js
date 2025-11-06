@@ -1,3 +1,4 @@
+import { log } from "console";
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
@@ -23,6 +24,7 @@ export const signup = async (req, res) => {
 
         const user = await User.findOne({email});
         if(user){
+            console.log("User already exists with email:", email);
             return res.status(400).json({message: 'User already exists'});
         }
 
@@ -61,9 +63,35 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+    const {email, password} = req.body;
 
+    try {
+        const user =  await User.findOne({email});
+        if(!user){
+            return res.status(400).json({message: 'Invalid email or password'});
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if(!isPasswordValid) {
+            return res.status(400).json({message: 'Invalid email or password'});
+        }
+
+        generateToken(user._id, res);
+
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message: 'Internal server error'});
+    }
 }
 
-export const logout = async (req, res) => {
-    
+export const logout = (_, res) => {
+    res.cookie("jwt", "", {maxAge: 0});
+    res.status(200).json({message: "Logged out successfully"});
 }
