@@ -1,7 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 
+const app = express();
 dotenv.config();
 
 import authRoutes from './routes/auth.route.js';
@@ -9,10 +11,10 @@ import messagesRoutes from './routes/message.route.js';
 import { connectDB } from './lib/db.js';
 
 const PORT = process.env.PORT || 3000;
-const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const __dirname = path.resolve();
 
@@ -31,3 +33,4 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     connectDB();
 })
+
