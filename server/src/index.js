@@ -30,6 +30,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, () => {
+    // console.log("JWT_SECRET:", process.env.JWT_SECRET);
     console.log(`Server is running on port ${PORT}`);
     connectDB();
 })
